@@ -1,19 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const recipeController = require('../controllers/recipeController');
+const photoController = require('../controllers/photoController');
 
 /**
- * App Routes 
+ * App Routes, linked to controller
 */
-router.get('/', recipeController.homepage);
-router.get('/recipe/:id', recipeController.exploreRecipe );
-router.get('/categories', recipeController.exploreCategories);
-router.get('/categories/:id', recipeController.exploreCategoriesById);
-router.post('/search', recipeController.searchRecipe);
-router.get('/explore-latest', recipeController.exploreLatest);
-router.get('/explore-random', recipeController.exploreRandom);
-router.get('/submit-recipe', recipeController.submitRecipe);
-router.post('/submit-recipe', recipeController.submitRecipeOnPost);
+router.get('/', photoController.homepage);
+router.get('/categories', photoController.exploreCategories);
+router.get('/categories/:name', photoController.exploreCategoriesByName);
+router.post('/search', photoController.searchRecipe);
+router.get('/add-photo', photoController.addPhoto);
+router.post('/add-photo', photoController.addPhotoOnPost);
+router.get('/contact', photoController.contactPage);
+
+router.get('/photo/:id', photoController.explorePhoto);
+router.get('/explore-latest', photoController.exploreLatest);
+router.get('/explore-random', photoController.exploreRandom);
+
 
  
+// need to expose the router
 module.exports = router;

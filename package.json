@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "env NODE_ENV=development node ./server/models/seed",
     "start": "nodemon app.js"
   },
+
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -20,7 +22,8 @@
     "express-fileupload": "^1.2.1",
     "express-session": "^1.17.2",
     "mongodb": "^4.1.2",
-    "mongoose": "^6.4.6"
+    "mongoose": "^7.4.0",
+    "stargate-mongoose": "^0.2.0-ALPHA-3"
   },
   "devDependencies": {
     "nodemon": "^2.0.13"

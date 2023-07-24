@@ -1,3 +1,4 @@
+//use nodemon to start app.js in package.json
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const fileUpload = require('express-fileupload');
@@ -10,6 +11,7 @@ const port = process.env.PORT || 3000;
 
 require('dotenv').config();
 
+// use middlewares
 app.use(express.urlencoded( { extended: true } ));
 app.use(express.static('public'));
 app.use(expressLayouts);

@@ -1,4 +1,14 @@
-# Recipe Blog - Using Node.js and MongoDB
+# photography-site-demo -
+
+> Node.js
+>
+> express
+>
+> mongoose + MongoDB / mongoose + stargate-mongoose + Cassandra
+>
+> 
+
+Using express Node.js and MongoDB
 
 ## Create .env file
 Create a .env file to store your MongoDB database credentials

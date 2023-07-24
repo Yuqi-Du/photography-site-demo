@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
+const mongoose = require('./database.js')
 
 const recipeSchema = new mongoose.Schema({
   name: {

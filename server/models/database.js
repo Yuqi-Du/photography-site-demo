@@ -1,12 +1,29 @@
 const mongoose = require('mongoose');
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+const stargate_mongoose = require('stargate-mongoose');
+const driver = stargate_mongoose.driver;
 
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function(){
-  console.log('Connected')
+// mongoose.set('autoCreate', true);
+// mongoose.set('autoIndex', false);
+// mongoose.set('toJSON', { virtuals: true });
+// mongoose.set('toObject', { virtuals: true });
+
+//override the default native driver
+mongoose.setDriver(driver);
+
+
+
+//Set up mongoose & end points definition
+mongoose.connect('http://localhost:8181/v1/photography', {
+    username: 'cassandra',
+    password: 'cassandra',
+    authUrl: 'http://localhost:8081/v1/auth'
 });
+
+// Export the mongoose instance
+// need to locate above the models. Sort of circular dependency issue.
+module.exports = mongoose;
 
 // Models
 require('./Category');
 require('./Recipe');
+
