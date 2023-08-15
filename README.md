@@ -6,7 +6,11 @@ This sample app demonstrates a photography site by using [`express`](https://www
 
 ## Environment
 
-Make sure you have Node.js 14 or higher and a local Stargate instance running as described on the [main page](../README.md) of this repo.
+Make sure you have Node.js 14 or higher
+
+Make sure you a local Stargate instance(DSE-Next) running as described on the [main page](../README.md) of this repo.
+
+Make sure you have a local python environment.
 
 ## .env
 
@@ -21,9 +25,9 @@ AUTH_URL = http://localhost:8081/v1/auth
 ```
 
 ## Running This Sample
-
+> Clone [`stargate-mongoose`](https://www.npmjs.com/package/express) locally, edit the package.json
 1. Run `npm install`
-1. Run `npm run seed`
-1. Run `npm start`
-1. Visit `http://127.0.0.1:3000` to see the UI
+2. Run `npm run seed`
+3. Run `npm start`
+4. Visit `http://127.0.0.1:3000` to see the UI
 

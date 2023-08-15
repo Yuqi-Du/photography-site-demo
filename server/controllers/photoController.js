@@ -5,8 +5,117 @@ const connect = require('../models/connect');
 const getTextEmbedding = require('../utils/textEmbeddingGenerator')
 const getPhotoEmbedding = require('../utils/imageEmbeddingGenerator')
 const fs = require('fs');
-const { PythonShell } = require('python-shell')
 
+
+
+
+/**
+ * POST /searchByPhotoDescriptionByVSearch
+ * searchByPhotoDescriptionByVSearch
+ * based on the embedding vector of photo description
+*/
+exports.searchByPhotoDescriptionByVSearch = async (req, res) => {
+  await connect();
+  let searchTerm = req.body.searchTerm;
+  const description_embedding = await getTextEmbedding(searchTerm);
+  let photo = null;
+  try {
+    if (req.body.categoryFilter) {
+      photo = await Photo.find({ 'category': { '$eq': req.body.categoryFilter } }).sort({ $vector: { $meta: description_embedding } }).limit(2);
+    } else {
+      photo = await Photo.find({}).sort({ $vector: { $meta: description_embedding } }).limit(2);
+    }
+    res.render('similaritySearch', { title: 'photography site - SimilaritySearch', photo, searchTerm });
+  } catch (error) {
+    res.status(500).send({ message: error.message || "Error Occured" });
+  }
+}
+
+/**
+ * POST /searchByPhotoByVSearch
+ * searchByPhotoByVSearch
+ * based on the embedding vector of photo itself
+*/
+exports.searchByPhotoByVSearch = async (req, res) => {
+  await connect();
+  try {
+    let imageUploadFile;
+    let uploadPath;
+    let newImageName;
+    if (!req.files || Object.keys(req.files).length === 0) {
+      console.log('No Files where uploaded.');
+    } else {
+      imageUploadFile = req.files.image;
+      newImageName = Date.now() + imageUploadFile.name; //avoid duplication
+      uploadPath = require('path').resolve('./') + '/public/uploads/' + newImageName;
+      imageUploadFile.mv(uploadPath, async function (err) {
+        const vector = await getPhotoEmbedding(newImageName); 
+        let photo = await PhotoEmbedding.find({}).sort({ $vector: { $meta: vector } }).limit(3);
+        fs.unlink(uploadPath, (err) => {
+          if (err) {
+            console.error('Error deleting the file:', err);
+          } else {
+            console.log('File deleted successfully');
+          }
+        });
+        res.render('photoSimilaritySearch', { title: 'photography site - similaritySearch ', photo });
+      })
+    }
+  } catch (error) {
+    req.flash('infoErrors', error);
+    res.redirect('/');
+  }
+}
+
+
+
+
+/**
+ * POST /add-photo
+*/
+exports.addPhotoOnPost = async (req, res) => {
+  await connect();
+  try {
+
+    let imageUploadFile;
+    let uploadPath;
+    let newImageName;
+
+    if (!req.files || Object.keys(req.files).length === 0) {
+      console.log('No Files where uploaded.');
+    } else {
+      imageUploadFile = req.files.image;
+      newImageName = Date.now() + imageUploadFile.name; //avoid duplication
+      uploadPath = require('path').resolve('./') + '/public/uploads/' + newImageName;
+      imageUploadFile.mv(uploadPath, function (err) {
+        if (err) return res.satus(500).send(err);
+      })
+    }
+    const description_embedding1 = await getTextEmbedding(req.body.description);
+    const newPhoto = new Photo({
+      name: req.body.name,
+      description: req.body.description,
+      category: req.body.category,
+      image: newImageName,
+      "$vector": description_embedding1,
+    });
+    await newPhoto.save();
+    const photoEmbedding = await getPhotoEmbedding(newImageName);
+    const newPhotoEmbedding = new PhotoEmbedding({
+      name: req.body.name,
+      description: req.body.description,
+      category: req.body.category,
+      image: newImageName,
+      "$vector": photoEmbedding,
+    });
+    await newPhotoEmbedding.save();
+    req.flash('infoSubmit', 'photo has been added.')
+    res.redirect('/add-photo');
+  } catch (error) {
+    req.flash('infoErrors', error);
+    res.redirect('/add-photo');
+  }
+}
 
 /**
  * GET /
@@ -45,7 +154,6 @@ exports.contactPage = async (req, res) => {
 */
 exports.exploreCategories = async (req, res) => {
   await connect();
-
   try {
     const limitNumber = 20;
     const categories = await Category.find({}).limit(limitNumber);
@@ -62,7 +170,6 @@ exports.exploreCategories = async (req, res) => {
 */
 exports.exploreCategoriesByName = async (req, res) => {
   await connect();
-
   try {
     let categoryName = req.params.name;
     const limitNumber = 20;
@@ -75,7 +182,6 @@ exports.exploreCategoriesByName = async (req, res) => {
 
 /**
  * GET /photo/:id
- * photo 
 */
 exports.explorePhoto = async (req, res) => {
   await connect();
@@ -88,6 +194,7 @@ exports.explorePhoto = async (req, res) => {
   }
 }
 
+
 exports.explorePhotoEmbedding = async (req, res) => {
   await connect();
   try {
@@ -99,80 +206,18 @@ exports.explorePhotoEmbedding = async (req, res) => {
   }
 }
 
-
 /**
  * POST /searchByPhotoNameExact
  * SearchByPhotoNameExact 
 */
 exports.searchPhotoByNameExact = async (req, res) => {
   await connect();
-
   try {
     let searchTerm = req.body.searchTerm;
     let photo = await Photo.find({ 'name': { '$eq': searchTerm } });
     res.render('search', { title: 'photography site - Search', photo, searchTerm });
   } catch (error) {
     res.status(500).send({ message: error.message || "Error Occured" });
-  }
-}
-
-
-/**
- * POST /searchByPhotoDescriptionByVSearch
- * searchByPhotoDescriptionByVSearch
- * based on the embedding vector of photo description
-*/
-exports.searchByPhotoDescriptionByVSearch = async (req, res) => {
-  await connect();
-  let searchTerm = req.body.searchTerm;
-  const description_embedding = await getTextEmbedding(searchTerm);
-  let photo = null;
-  try {
-    if (req.body.categoryFilter) {
-      photo = await Photo.find({ 'category': { '$eq': req.body.categoryFilter } }).sort({ $vector: { $meta: description_embedding } }).limit(5);
-    } else {
-      photo = await Photo.find({}).sort({ $vector: { $meta: description_embedding } }).limit(3);
-
-    }
-    res.render('similaritySearch', { title: 'photography site - SimilaritySearch', photo, searchTerm });
-  } catch (error) {
-    res.status(500).send({ message: error.message || "Error Occured" });
-  }
-}
-
-/**
- * POST /searchByPhotoByVSearch
- * searchByPhotoByVSearch
- * based on the embedding vector of photo itself
-*/
-exports.searchByPhotoByVSearch = async (req, res) => {
-  await connect();
-  try {
-    let imageUploadFile;
-    let uploadPath;
-    let newImageName;
-    if (!req.files || Object.keys(req.files).length === 0) {
-      console.log('No Files where uploaded.');
-    } else {
-      imageUploadFile = req.files.image;
-      newImageName = Date.now() + imageUploadFile.name; //avoid duplication
-      uploadPath = require('path').resolve('./') + '/public/uploads/' + newImageName;
-      imageUploadFile.mv(uploadPath, async function (err) {
-        const vector = await getPhotoEmbedding(newImageName);
-        let photo = await PhotoEmbedding.find({}).sort({ $vector: { $meta: vector } }).limit(3);
-        fs.unlink(uploadPath, (err) => {
-          if (err) {
-            console.error('Error deleting the file:', err);
-          } else {
-            console.log('File deleted successfully');
-          }
-        });
-        res.render('photoSimilaritySearch', { title: 'photography site - similaritySearch ', photo });
-      })
-    }
-  } catch (error) {
-    req.flash('infoErrors', error);
-    res.redirect('/');
   }
 }
 
@@ -193,10 +238,8 @@ exports.exploreLatest = async (req, res) => {
 }
 
 
-
 /**
  * GET /explore-random
- * Explore Random as JSON
 */
 exports.exploreRandom = async (req, res) => {
   await connect();
@@ -213,7 +256,6 @@ exports.exploreRandom = async (req, res) => {
 
 /**
  * GET /add-photo
- * add photo
 */
 exports.addPhoto = async (req, res) => {
   const infoErrorsObj = req.flash('infoErrors');
@@ -221,60 +263,5 @@ exports.addPhoto = async (req, res) => {
   res.render('add-photo', { title: 'photography site - Add Photo', infoErrorsObj, infoSubmitObj });
 }
 
-/**
- * POST /add-photo
- * add photo
-*/
-exports.addPhotoOnPost = async (req, res) => {
-  await connect();
-  try {
-
-    let imageUploadFile;
-    let uploadPath;
-    let newImageName;
-
-    if (!req.files || Object.keys(req.files).length === 0) {
-      console.log('No Files where uploaded.');
-    } else {
-
-      imageUploadFile = req.files.image;
-      newImageName = Date.now() + imageUploadFile.name; //avoid duplication
-
-      uploadPath = require('path').resolve('./') + '/public/uploads/' + newImageName;
-
-      imageUploadFile.mv(uploadPath, function (err) {
-        if (err) return res.satus(500).send(err);
-      })
-    }
-    const description_embedding1 = await getTextEmbedding(req.body.description);
-    const newPhoto = new Photo({
-      name: req.body.name,
-      description: req.body.description,
-      category: req.body.category,
-      image: newImageName,
-      "$vector": description_embedding1,
-    });
-
-    await newPhoto.save();
-
-    const photoEmbedding = await getPhotoEmbedding(newImageName);
-    const newPhotoEmbedding = new PhotoEmbedding({
-      name: req.body.name,
-      description: req.body.description,
-      category: req.body.category,
-      image: newImageName,
-      "$vector": photoEmbedding,
-    });
-    await newPhotoEmbedding.save();
-
-
-    req.flash('infoSubmit', 'photo has been added.')
-    res.redirect('/add-photo');
-  } catch (error) {
-    // res.json(error);
-    req.flash('infoErrors', error);
-    res.redirect('/add-photo');
-  }
-}
 
 

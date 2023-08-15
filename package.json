@@ -26,6 +26,7 @@
     "mongoose": "^7.4.0",
     "python-shell": "^5.0.0",
     "stargate-mongoose": "/Users/yuqi.du/idea_workspace/stargate-mongoose"
+
   },
   "devDependencies": {
     "nodemon": "^2.0.13"
