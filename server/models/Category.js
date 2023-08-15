@@ -1,5 +1,6 @@
-// const mongoose = require('mongoose');
-const mongoose = require('./database.js')
+'use strict';
+
+const mongoose = require('./mongoose.js')
 
 const categorySchema = new mongoose.Schema({
   name: {
@@ -12,4 +13,4 @@ const categorySchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Category', categorySchema);
+module.exports = mongoose.model('category', categorySchema);

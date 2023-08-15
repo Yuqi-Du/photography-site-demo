@@ -1,45 +1,29 @@
-# photography-site-demo -
 
-> Node.js
->
-> express
->
-> mongoose + MongoDB / mongoose + stargate-mongoose + Cassandra
->
-> 
 
-Using express Node.js and MongoDB
+# photography-site
 
-## Create .env file
-Create a .env file to store your MongoDB database credentials
+This sample app demonstrates a photography site by using [`express`](https://www.npmjs.com/package/express), [`mongoose`](https://github.com/Automattic/mongoose) and [`stargate-mongoose`](https://github.com/stargate/stargate-mongoose). 
 
-```
-MONGODB_URI = mongodb+srv://<username>:<password>@cluster0.6m5cz.mongodb.net/Recipes?retryWrites=true&w=majority
-```
+## Environment
 
-## Installation
-To run this project, install it locally using npm:
+Make sure you have Node.js 14 or higher and a local Stargate instance running as described on the [main page](../README.md) of this repo.
+
+## .env
+
+create a .env file as following:
 
 ```
-$ npm install
-$ npm start
+OPENAI_API_KEY = your openAI API key for using embedding
+NODE_ENV = development
+JSON_API_URL = http://127.0.0.1:8181/v1/photography
+AUTH_URL = http://localhost:8081/v1/auth
+
 ```
 
+## Running This Sample
 
-### YouTube Video & Article
+1. Run `npm install`
+1. Run `npm run seed`
+1. Run `npm start`
+1. Visit `http://127.0.0.1:3000` to see the UI
 
-[YouTube Video](https://youtu.be/OEdPH4fV7vY)
-
-[Read Article](https://raddy.dev/blog/how-to-build-a-recipe-blog-using-node-js-and-mongodb-express-ejs-mongoose-crud/)
-
-### YouTube Channel - Raddy
-
-[Subscribe to my YouTube Channel](https://www.youtube.com/channel/UCvXscyQ0cLzPZeNOeXI45Sw?sub_confirmation=1)
-
-### Website
-[www.raddy.dev](https://www.raddy.dev)
-
-### Donations
-[Via Paypal](https://www.paypal.com/donate/?hosted_button_id=YUH7JRDUN5QEY)
-
-[Buy me a Coffee](https://www.buymeacoffee.com/RaddyTheBrand)

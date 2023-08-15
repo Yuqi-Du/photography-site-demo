@@ -12,13 +12,14 @@ const port = process.env.PORT || 3000;
 require('dotenv').config();
 
 // use middlewares
-app.use(express.urlencoded( { extended: true } ));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(expressLayouts);
 
-app.use(cookieParser('CookingBlogSecure'));
+
+app.use(cookieParser('PhotographySiteSecure'));
 app.use(session({
-  secret: 'CookingBlogSecretSession',
+  secret: 'PhotographySiteSecretSession',
   saveUninitialized: true,
   resave: true
 }));
@@ -28,7 +29,9 @@ app.use(fileUpload());
 app.set('layout', './layouts/main');
 app.set('view engine', 'ejs');
 
-const routes = require('./server/routes/recipeRoutes.js')
+const routes = require('./server/routes/photoRoutes.js')
 app.use('/', routes);
+const cors = require('cors');
+app.use(cors());
 
-app.listen(port, ()=> console.log(`Listening to port ${port}`));
+app.listen(port, () => console.log(`Listening to port ${port}`));

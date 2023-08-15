@@ -1,5 +1,15 @@
-// const mongoose = require('mongoose');
-const mongoose = require('./database.js')
+'use strict';
+const mongoose = require('./mongoose')
+
+const options = {
+  "collectionOptions": {
+    "vector": {
+      "size": 1536, //embedding array size for openAI embedding api, text->vector
+      "function": "cosine",
+    }
+  },
+  "strict": false
+};
 
 const photoSchema = new mongoose.Schema({
   name: {
@@ -19,10 +29,8 @@ const photoSchema = new mongoose.Schema({
     enum: ['landscape', 'street', 'animal'],
     required: 'This field is required.'
   },
-});
+}, options);
 
-photoSchema.index({ name: 'text', description: 'text' });
-// WildCard Indexing
-//photoSchema.index({ "$**" : 'text' });
 
-module.exports = mongoose.model('Photo', photoSchema);
+
+module.exports = mongoose.model('photo', photoSchema);

@@ -43,3 +43,7 @@ a { color: var(--bs-dark); }
   width: 100%;
   object-fit: cover;
 }
+
+.list-group-item {
+  border : none;
+}
