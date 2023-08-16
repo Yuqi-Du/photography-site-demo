@@ -10,7 +10,7 @@ Make sure you have Node.js 14 or higher
 
 Make sure you a local Stargate instance(DSE-Next) running as described on the [main page](../README.md) of this repo.
 
-Make sure you have a local python environment.
+Make sure you have a local python environment and install [mediapipe](https://pypi.org/project/mediapipe/) using `pip install mediapipe`
 
 ## .env
 
