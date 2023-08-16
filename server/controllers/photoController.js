@@ -1,7 +1,6 @@
 const Category = require('../models/Category');
 const Photo = require('../models/Photo');
 const PhotoEmbedding = require('../models/PhotoEmbedding');
-const connect = require('../models/connect');
 const getTextEmbedding = require('../utils/textEmbeddingGenerator')
 const getPhotoEmbedding = require('../utils/imageEmbeddingGenerator')
 const fs = require('fs');
@@ -15,7 +14,6 @@ const fs = require('fs');
  * based on the embedding vector of photo description
 */
 exports.searchByPhotoDescriptionByVSearch = async (req, res) => {
-  await connect();
   let searchTerm = req.body.searchTerm;
   const description_embedding = await getTextEmbedding(searchTerm);
   let photo = null;
@@ -37,7 +35,6 @@ exports.searchByPhotoDescriptionByVSearch = async (req, res) => {
  * based on the embedding vector of photo itself
 */
 exports.searchByPhotoByVSearch = async (req, res) => {
-  await connect();
   try {
     let imageUploadFile;
     let uploadPath;
@@ -48,18 +45,25 @@ exports.searchByPhotoByVSearch = async (req, res) => {
       imageUploadFile = req.files.image;
       newImageName = Date.now() + imageUploadFile.name; //avoid duplication
       uploadPath = require('path').resolve('./') + '/public/uploads/' + newImageName;
-      imageUploadFile.mv(uploadPath, async function (err) {
-        const vector = await getPhotoEmbedding(newImageName); 
-        let photo = await PhotoEmbedding.find({}).sort({ $vector: { $meta: vector } }).limit(3);
-        fs.unlink(uploadPath, (err) => {
-          if (err) {
-            console.error('Error deleting the file:', err);
-          } else {
-            console.log('File deleted successfully');
+      await new Promise((resolve, reject) => {
+        imageUploadFile.mv(uploadPath, err => {
+          if (err != null) {
+            return reject(err);
           }
+          resolve();
         });
-        res.render('photoSimilaritySearch', { title: 'photography site - similaritySearch ', photo });
-      })
+      });
+      const vector = await getPhotoEmbedding(newImageName); 
+      let photo = await PhotoEmbedding.find({}).sort({ $vector: { $meta: vector } }).limit(3);
+      await new Promise((resolve, reject) => {
+        fs.unlink(uploadPath, err => {
+          if (err != null) {
+            return reject(err);
+          }
+          resolve();
+        })
+      });
+      res.render('photoSimilaritySearch', { title: 'photography site - similaritySearch ', photo });
     }
   } catch (error) {
     req.flash('infoErrors', error);
@@ -74,7 +78,6 @@ exports.searchByPhotoByVSearch = async (req, res) => {
  * POST /add-photo
 */
 exports.addPhotoOnPost = async (req, res) => {
-  await connect();
   try {
 
     let imageUploadFile;
@@ -122,7 +125,6 @@ exports.addPhotoOnPost = async (req, res) => {
  * Homepage 
 */
 exports.homepage = async (req, res) => {
-  await connect();
   try {
     const limitNumber = 5;
     const categories = await Category.find({}).limit(limitNumber);
@@ -153,7 +155,6 @@ exports.contactPage = async (req, res) => {
  * Categories 
 */
 exports.exploreCategories = async (req, res) => {
-  await connect();
   try {
     const limitNumber = 20;
     const categories = await Category.find({}).limit(limitNumber);
@@ -169,7 +170,6 @@ exports.exploreCategories = async (req, res) => {
  * Categories By Id -> id in cassandra
 */
 exports.exploreCategoriesByName = async (req, res) => {
-  await connect();
   try {
     let categoryName = req.params.name;
     const limitNumber = 20;
@@ -184,7 +184,6 @@ exports.exploreCategoriesByName = async (req, res) => {
  * GET /photo/:id
 */
 exports.explorePhoto = async (req, res) => {
-  await connect();
   try {
     let photoId = req.params.id;
     const photo = await Photo.findById(photoId);
@@ -196,7 +195,6 @@ exports.explorePhoto = async (req, res) => {
 
 
 exports.explorePhotoEmbedding = async (req, res) => {
-  await connect();
   try {
     let photoEmbeddingId = req.params.id;
     const photo = await PhotoEmbedding.findById(photoEmbeddingId);
@@ -211,7 +209,6 @@ exports.explorePhotoEmbedding = async (req, res) => {
  * SearchByPhotoNameExact 
 */
 exports.searchPhotoByNameExact = async (req, res) => {
-  await connect();
   try {
     let searchTerm = req.body.searchTerm;
     let photo = await Photo.find({ 'name': { '$eq': searchTerm } });
@@ -227,7 +224,6 @@ exports.searchPhotoByNameExact = async (req, res) => {
  * Explplore Latest 
 */
 exports.exploreLatest = async (req, res) => {
-  await connect();
   try {
     const limitNumber = 20;
     const photo = await Photo.find({}).sort({ _id: -1 }).limit(limitNumber);
@@ -242,7 +238,6 @@ exports.exploreLatest = async (req, res) => {
  * GET /explore-random
 */
 exports.exploreRandom = async (req, res) => {
-  await connect();
   try {
     let count = await Photo.find().countDocuments();
     let random = Math.floor(Math.random() * count);
