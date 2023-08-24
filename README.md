@@ -10,7 +10,7 @@ Make sure you have Node.js 17 or higher
 
 Make sure you have Cassandra support
 
-> If want to run cassandra locally, you need to have a local Stargate instance(DSE-Next) running as described on  the [main page](../README.md) of this repo.
+> If want to run cassandra locally, you need to have a local Stargate instance(DSE-Next) running as described on the [main page](https://github.com/stargate/stargate-mongoose-sample-apps/tree/main) of this repo.
 >
 > If want to run against AstraDB, please go to [AstraDB](https://dev.cloud.datastax.com/) create your database and keyspace 'photography' .
 
